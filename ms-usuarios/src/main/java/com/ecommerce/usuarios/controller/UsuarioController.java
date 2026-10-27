@@ -1,7 +1,9 @@
 package com.ecommerce.usuarios.controller;
 
 import com.ecommerce.usuarios.model.Usuario;
-import com.ecommerce.usuarios.repository.UsuarioRepository;
+import com.ecommerce.usuarios.dto.UsuarioRequest;
+import com.ecommerce.usuarios.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,21 +11,36 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
-    private final UsuarioRepository repository;
+    private final UsuarioService service;
 
-    public UsuarioController(UsuarioRepository repository) {
-        this.repository = repository;
+    public UsuarioController(UsuarioService service) {
+        this.service = service;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Usuario criar(@RequestBody Usuario usuario) {
-        return repository.save(usuario);
+    public Usuario criar(@Valid @RequestBody UsuarioRequest request) {
+        return service.criar(request);
+    }
+
+    @GetMapping
+    public java.util.List<Usuario> listar() {
+        return service.listar();
     }
 
     @GetMapping("/{id}")
     public Usuario buscar(@PathVariable Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        return service.buscar(id);
+    }
+
+    @PutMapping("/{id}")
+    public Usuario atualizar(@PathVariable Long id, @Valid @RequestBody UsuarioRequest request) {
+        return service.atualizar(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void excluir(@PathVariable Long id) {
+        service.excluir(id);
     }
 }

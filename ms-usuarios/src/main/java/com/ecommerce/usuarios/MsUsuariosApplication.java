@@ -1,4 +1,4 @@
-package com.ecommerce.ms_usuarios;
+package com.ecommerce.usuarios;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

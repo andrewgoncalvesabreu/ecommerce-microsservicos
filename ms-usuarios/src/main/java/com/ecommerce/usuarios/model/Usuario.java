@@ -1,6 +1,9 @@
 package com.ecommerce.usuarios.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "usuarios")
@@ -10,13 +13,19 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     private String nome;
 
     @Column(unique = true, nullable = false)
+    @Email
+    @NotBlank
     private String email;
 
+    @NotBlank
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
 
+    @NotBlank
     private String endereco;
 
     public Usuario() {

@@ -1,4 +1,4 @@
-package com.ecommerce.ms_produtos;
+package com.ecommerce.produtos;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
