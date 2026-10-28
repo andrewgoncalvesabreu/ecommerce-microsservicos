@@ -1,0 +1,126 @@
+services:
+
+  # ── Bancos de dados isolados ──────────────────────────────────────
+
+  db-usuarios:
+    image: postgres:17-alpine
+    container_name: db-usuarios
+    environment:
+      POSTGRES_DB: usuarios
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata-usuarios:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d usuarios"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  db-produtos:
+    image: postgres:17-alpine
+    container_name: db-produtos
+    environment:
+      POSTGRES_DB: produtos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata-produtos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d produtos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  db-pedidos:
+    image: postgres:17-alpine
+    container_name: db-pedidos
+    environment:
+      POSTGRES_DB: pedidos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata-pedidos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pedidos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Microsserviços ────────────────────────────────────────────────
+
+  ms-usuarios:
+    build: ./ms-usuarios
+    container_name: ms-usuarios
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-usuarios:5432/usuarios
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      db-usuarios:
+        condition: service_healthy
+
+  ms-produtos:
+    build: ./ms-produtos
+    container_name: ms-produtos
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-produtos:5432/produtos
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      db-produtos:
+        condition: service_healthy
+
+  ms-pedidos:
+    build: ./ms-pedidos
+    container_name: ms-pedidos
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-pedidos:5432/pedidos
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SERVICES_USUARIOS_URL: http://ms-usuarios:8081
+      SERVICES_PRODUTOS_URL: http://ms-produtos:8082
+    depends_on:
+      db-pedidos:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_started
+      ms-produtos:
+        condition: service_started
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_CLOUD_GATEWAY_ROUTES_0_ID: usuarios
+      SPRING_CLOUD_GATEWAY_ROUTES_0_URI: http://ms-usuarios:8081
+      SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: Path=/usuarios/**
+      SPRING_CLOUD_GATEWAY_ROUTES_1_ID: produtos
+      SPRING_CLOUD_GATEWAY_ROUTES_1_URI: http://ms-produtos:8082
+      SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: Path=/produtos/**
+      SPRING_CLOUD_GATEWAY_ROUTES_2_ID: pedidos
+      SPRING_CLOUD_GATEWAY_ROUTES_2_URI: http://ms-pedidos:8083
+      SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: Path=/pedidos/**
+    depends_on:
+      - ms-usuarios
+      - ms-produtos
+      - ms-pedidos
+
+volumes:
+  pgdata-usuarios:
+  pgdata-produtos:
+  pgdata-pedidos:

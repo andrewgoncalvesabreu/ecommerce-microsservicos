@@ -1,0 +1,20 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: ms-pedidos
+  datasource:
+    url: jdbc:postgresql://localhost:5435/pedidos
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+services:
+  usuarios:
+    url: http://localhost:8081
+  produtos:
+    url: http://localhost:8082
