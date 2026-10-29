@@ -3,7 +3,9 @@ package com.ecommerce.usuarios.service;
 import com.ecommerce.usuarios.dto.UsuarioRequest;
 import com.ecommerce.usuarios.model.Usuario;
 import com.ecommerce.usuarios.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class UsuarioService {
 
     public Usuario buscar(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
     }
 
     public Usuario atualizar(Long id, UsuarioRequest request) {

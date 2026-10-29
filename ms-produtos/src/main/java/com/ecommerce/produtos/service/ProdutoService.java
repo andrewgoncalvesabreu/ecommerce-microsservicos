@@ -3,7 +3,9 @@ package com.ecommerce.produtos.service;
 import com.ecommerce.produtos.dto.ProdutoRequest;
 import com.ecommerce.produtos.model.Produto;
 import com.ecommerce.produtos.repository.ProdutoRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class ProdutoService {
 
     public Produto buscar(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
     }
 
     public Produto atualizar(Long id, ProdutoRequest request) {

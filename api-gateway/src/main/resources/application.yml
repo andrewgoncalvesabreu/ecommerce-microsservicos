@@ -4,18 +4,23 @@ server:
 spring:
   application:
     name: api-gateway
+
   cloud:
     gateway:
-      routes:
-        - id: usuarios
-          uri: http://localhost:8081
-          predicates:
-            - Path=/usuarios/**
-        - id: produtos
-          uri: http://localhost:8082
-          predicates:
-            - Path=/produtos/**
-        - id: pedidos
-          uri: http://localhost:8083
-          predicates:
-            - Path=/pedidos/**
+      server:
+        webmvc:
+          routes:
+            - id: usuarios
+              uri: http://ms-usuarios:8081
+              predicates:
+                - Path=/usuarios/**
+
+            - id: produtos
+              uri: http://ms-produtos:8082
+              predicates:
+                - Path=/produtos/**
+
+            - id: pedidos
+              uri: http://ms-pedidos:8083
+              predicates:
+                - Path=/pedidos/**
